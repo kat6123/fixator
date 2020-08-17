@@ -5,7 +5,23 @@ import (
 	"fmt"
 )
 
-type Fixator struct {
+type (
+	Config struct {
+		MinVelocity float64 `yaml:"min_velocity"`
+		MaxVelocity float64 `yaml:"max_velocity"`
+	}
+
+	Fixator struct {
+		minVelocity float64
+		maxVelocity float64
+	}
+)
+
+func New(config Config) *Fixator {
+	return &Fixator{
+		config.MinVelocity,
+		config.MaxVelocity,
+	}
 }
 
 func (f *Fixator) Fix(fixation *model.Fixation) error {

@@ -23,7 +23,7 @@ const layout = "\"02.01.2006 15:04:05\""
 func (t *FixationTime) UnmarshalJSON(b []byte) error {
 	parsedTime, err := time.Parse(layout, string(b))
 	if err != nil {
-		return fmt.Errorf("parse order time: %v", err)
+		return fmt.Errorf("parse fixation time: %v", err)
 	}
 	*t = FixationTime(parsedTime)
 	return nil
@@ -37,7 +37,7 @@ func (f *FixationFloat) UnmarshalJSON(b []byte) error {
 	b = bytes.Replace(b, []byte{','}, []byte{'.'}, 1)
 	parsed, err := strconv.ParseFloat(string(b), 64)
 	if err != nil {
-		return fmt.Errorf("parse order time: %v", err)
+		return fmt.Errorf("parse fixation velocity: %v", err)
 	}
 	*f = FixationFloat(parsed)
 	return nil

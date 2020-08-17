@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fixator/config"
 	"fixator/fixator"
 	"fixator/handler"
 	"log"
@@ -8,8 +9,13 @@ import (
 )
 
 func main() {
-	s := &fixator.Fixator{}
-	api := handler.New(s)
+	conf, err := config.Get()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	log.Fatal(http.ListenAndServe(":3030", api.Router()))
+	s := fixator.New(conf.Fixator)
+	api := handler.New(s, conf.Service)
+
+	log.Fatal(http.ListenAndServe(conf.Host+":"+conf.Port, api.Router()))
 }

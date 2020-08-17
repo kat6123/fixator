@@ -20,6 +20,11 @@ type (
 		SelectRange(date model.FixationTime) ([2]*model.Fixation, error)
 	}
 
+	Config struct {
+		SelectStartHour TimePeriod `yaml:"select_start"`
+		SelectEndHour   TimePeriod `yaml:"select_end"`
+	}
+
 	API struct {
 		s Fixator
 		r *mux.Router
@@ -27,16 +32,18 @@ type (
 )
 
 // New returns new API instance and initializes api router.
-func New(s Fixator) *API {
+func New(s Fixator, config Config) *API {
 	api := &API{
 		s: s,
 		r: mux.NewRouter().StrictSlash(true),
 	}
 
 	api.r.HandleFunc("/fixation", api.Fix).Methods("POST")
-	api.r.HandleFunc("/fixation/select", api.SelectFixations).
+
+	inPeriodMiddleware := inPeriod(config.SelectStartHour, config.SelectEndHour)
+	api.r.HandleFunc("/fixation/select", inPeriodMiddleware(api.SelectFixations)).
 		Queries("date", "{date}", "start", "{start}").Methods("GET")
-	api.r.HandleFunc("/fixation/select/range", api.SelectRange).
+	api.r.HandleFunc("/fixation/select/range", inPeriodMiddleware(api.SelectRange)).
 		Queries("date", "{date}").Methods("GET")
 
 	return api
