@@ -75,7 +75,7 @@ func TestFixationTime_MarshalJSON(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			parsedTime, err := time.Parse(layout, tt.time)
 			if err != nil {
-				fmt.Printf("parse order time: %v", err)
+				fmt.Printf("parse fixation time: %v", err)
 				return
 			}
 			got, err := parsedTime.MarshalJSON()
