@@ -4,24 +4,39 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type (
 	FixationTime  time.Time
 	FixationFloat float64
+
+	Fixation struct {
+		Datetime FixationTime  `json:"Дата и время фиксации"`
+		Car      string        `json:"Номер транспортного средства"`
+		Velocity FixationFloat `json:"Скорость движения км/ч,string"`
+	}
 )
 
-type Fixation struct {
-	Datetime FixationTime  `json:"Дата и время фиксации"`
-	Car      string        `json:"Номер транспортного средства"`
-	Velocity FixationFloat `json:"Скорость движения км/ч,string"`
+const layout = "02.01.2006 15:04:05"
+
+func (f FixationFloat) String() string {
+	parsed := strconv.FormatFloat(float64(f), 'f', 2, 64)
+	s := strings.Replace(parsed, ".", ",", 1)
+	return s
 }
 
-const layout = "\"02.01.2006 15:04:05\""
+func (t FixationTime) String() string {
+	return time.Time(t).Format(layout)
+}
+
+func (f Fixation) String() string {
+	return fmt.Sprintf("%s %s %s", f.Datetime, f.Car, f.Velocity)
+}
 
 func (t *FixationTime) UnmarshalJSON(b []byte) error {
-	parsedTime, err := time.Parse(layout, string(b))
+	parsedTime, err := time.Parse(`"`+layout+`"`, string(b))
 	if err != nil {
 		return fmt.Errorf("parse fixation time: %v", err)
 	}
@@ -30,7 +45,7 @@ func (t *FixationTime) UnmarshalJSON(b []byte) error {
 }
 
 func (t FixationTime) MarshalJSON() ([]byte, error) {
-	return []byte(time.Time(t).Format(layout)), nil
+	return []byte(`"` + t.String() + `"`), nil
 }
 
 func (f *FixationFloat) UnmarshalJSON(b []byte) error {
@@ -44,8 +59,5 @@ func (f *FixationFloat) UnmarshalJSON(b []byte) error {
 }
 
 func (f FixationFloat) MarshalJSON() ([]byte, error) {
-	parsed := []byte(
-		`"` + strconv.FormatFloat(float64(f), 'g', -1, 64) + `"`)
-	b := bytes.Replace(parsed, []byte{'.'}, []byte{','}, 1)
-	return b, nil
+	return []byte(`"` + f.String() + `"`), nil
 }
