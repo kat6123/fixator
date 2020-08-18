@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"time"
 )
 
 type (
@@ -60,9 +62,8 @@ func New(config Config) *Fixator {
 
 func initWorkers() map[string]chan *entity {
 	workers := make(map[string]chan *entity)
-	velRange := getVelocityRanges()
-	workerBuffer := buffer / len(velRange)
-	for _, vel := range velRange {
+	workerBuffer := buffer / len(velocityRanges)
+	for _, vel := range velocityRanges {
 		workers[vel] = make(chan *entity, buffer/workerBuffer)
 	}
 	return workers
@@ -90,19 +91,26 @@ func (f *Fixator) Select(date model.FixationTime, velocity model.FixationFloat) 
 	return velocityRange, nil
 }
 
-func (f *Fixator) SelectRange(date model.FixationTime) ([2]*model.Fixation, error) {
-	var velocityRange [2]*model.Fixation
+func (f *Fixator) SelectRange(date model.FixationTime) ([2]string, error) {
+	start := time.Now()
 
-	velocityRange[0] = &model.Fixation{
-		Datetime: model.FixationTime{},
-		Car:      "sAS",
-		Velocity: 65,
-	}
-	velocityRange[1] = &model.Fixation{
-		Datetime: model.FixationTime{},
-		Car:      "sAS",
-		Velocity: 65,
-	}
+	var minmax [2]string
+	min, max := make(chan string), make(chan string)
 
-	return velocityRange, nil
+	root := filepath.Join(f.root, time.Time(date).Format(dayLayout))
+	go findMIN(root, min)
+	go findMAX(root, max)
+
+	for i := 0; i < 2; i++ {
+		select {
+		case x := <-min:
+			minmax[0] = x
+		case x := <-max:
+			minmax[1] = x
+		}
+	}
+	elapsed := time.Since(start)
+	log.Printf("minmax took %s", elapsed)
+
+	return minmax, nil
 }

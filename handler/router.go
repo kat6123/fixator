@@ -17,7 +17,7 @@ type (
 	Fixator interface {
 		Fix(fixation *model.Fixation) error
 		Select(date model.FixationTime, velocity model.FixationFloat) ([]*model.Fixation, error)
-		SelectRange(date model.FixationTime) ([2]*model.Fixation, error)
+		SelectRange(date model.FixationTime) ([2]string, error)
 	}
 
 	Config struct {
