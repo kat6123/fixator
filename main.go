@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"fixator/config"
 	"fixator/fixator"
 	"fixator/handler"
-	"log"
-	"net/http"
 )
 
 func main() {
