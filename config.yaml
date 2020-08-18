@@ -1,6 +1,7 @@
 fixator:
   min_velocity: 0
   max_velocity: 250
+  root: ./db
 service:
   select_start: 9:00
   select_end: 18:00
