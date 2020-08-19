@@ -32,7 +32,7 @@ func (t FixationTime) String() string {
 }
 
 func (f Fixation) String() string {
-	return fmt.Sprintf("%s %s %s", f.Datetime, f.Car, f.Velocity)
+	return fmt.Sprintf("%d %s %.2f", time.Time(f.Datetime).Unix(), f.Car, float64(f.Velocity))
 }
 
 func (t *FixationTime) UnmarshalJSON(b []byte) error {

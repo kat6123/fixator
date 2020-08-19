@@ -2,10 +2,10 @@ package fixator
 
 import (
 	"bufio"
-	"fixator/model"
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -22,7 +22,6 @@ func findMIN(root string, out chan string) {
 	minCh := make(chan *minmax)
 	s, min, minVal := 0, 0., ""
 
-	var cur model.FixationFloat
 	for i := 0; i < len(Files); i++ {
 		{
 			if !checkNext {
@@ -45,14 +44,15 @@ func findMIN(root string, out chan string) {
 					for scanner.Scan() {
 						value := scanner.Text()
 						split := strings.Split(value, " ")
-						if err := cur.UnmarshalJSON([]byte(split[3])); err != nil {
+						cur, err := strconv.ParseFloat(split[2], 32)
+						if err != nil {
 							log.Printf("find min: can't unmarshal %s: %v", value, err)
 							minCh <- &minmax{}
 							return
 						}
 
-						if float64(cur) < min {
-							min, minVal = float64(cur), value
+						if cur < min {
+							min, minVal = cur, value
 						}
 					}
 
@@ -87,7 +87,6 @@ func findMAX(root string, out chan string) {
 	maxCh := make(chan *minmax)
 	s, max, maxVal := 0, 0., ""
 
-	var cur model.FixationFloat
 	for i := len(Files) - 1; i >= 0; i-- {
 		{
 			if !checkNext {
@@ -110,14 +109,15 @@ func findMAX(root string, out chan string) {
 					for scanner.Scan() {
 						value := scanner.Text()
 						split := strings.Split(value, " ")
-						if err := cur.UnmarshalJSON([]byte(split[3])); err != nil {
+						cur, err := strconv.ParseFloat(split[2], 32)
+						if err != nil {
 							log.Printf("find max: can't unmarshal %s: %v", value, err)
 							maxCh <- &minmax{}
 							return
 						}
 
-						if float64(cur) > max {
-							max, maxVal = float64(cur), value
+						if cur > max {
+							max, maxVal = cur, value
 						}
 					}
 
