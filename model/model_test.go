@@ -18,7 +18,7 @@ func TestFixationFloat_MarshalJSON(t *testing.T) {
 		{
 			name: "marshal 65.5",
 			f:    65.5,
-			want: "\"65,5\"",
+			want: "\"65,50\"",
 		},
 	}
 	for _, tt := range tests {
@@ -78,7 +78,7 @@ func TestFixationTime_MarshalJSON(t *testing.T) {
 				fmt.Printf("parse fixation time: %v", err)
 				return
 			}
-			got, err := parsedTime.MarshalJSON()
+			got, err := FixationTime(parsedTime).MarshalJSON()
 			if err != nil {
 				assert.EqualError(t, err, tt.wantErrMsg)
 			}
