@@ -36,17 +36,17 @@ func init() {
 
 func getFixationInfo(fixation *model.Fixation) (dir string, channel string, path string, value string) {
 	dir = time.Time(fixation.Datetime).Format(dayLayout)
-	channel, path = getFixationPath(fixation)
+	channel = rangeByFloat(fixation.Velocity)
+	path = fmt.Sprintf("%s-%d", channel, time.Time(fixation.Datetime).Hour())
 	value = fixation.String()
 
 	return
 }
 
-func getFixationPath(f *model.Fixation) (string, string) {
-	vel, start, end := int(f.Velocity)/step, rangeStart/step, rangeEnd/step
-	hour := time.Time(f.Datetime).Hour()
-	velocity := ""
+func rangeByFloat(v model.FixationFloat) string {
+	vel, start, end := int(v)/step, rangeStart/step, rangeEnd/step
 
+	velocity := ""
 	if vel < start {
 		velocity = strconv.Itoa(rangeStart)
 	} else if vel >= end {
@@ -54,6 +54,5 @@ func getFixationPath(f *model.Fixation) (string, string) {
 	} else {
 		velocity = strconv.Itoa((vel + 1) * step)
 	}
-
-	return velocity, fmt.Sprintf("%s-%d", velocity, hour)
+	return velocity
 }
