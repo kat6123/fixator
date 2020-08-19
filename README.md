@@ -14,15 +14,17 @@ The main idea is to use a file system instead of a database to optimize the perf
     The simplest split is ranges from 0-10, 10-20, ..., 240-250, but assuming there are fewer cars with extreme 
     velocities during the day I split our range into the first chunk from 0 to 40, the last from 150 to 250, and 
     in between 40-50, 50-60 ... - as an attempt to make the uniform distribution of entries between the files. 
-    * This structure is useful for fast search and sort of entries.
+* Based on the velocity and hour of fixation we will append the entry to the specific file.
+For ex. 18.08.2020 14:11:12 PKIT-87 KK 67,3 goes to the file '70-12'.
+* Such structure is useful for fast search and save of entries. 
 
 ### Service work
 #### Save fixation
-
+![Fix logic](img/Fix.png?raw=true "Fix logic")
 #### Select MinMax
-
+![MinMax logic](img/MinMax.png?raw=true "MinMax")
 #### Select Range
-
+![Select logic](img/Select.png?raw=true "Select")
 ## Usage
 ## ToDo:
 Router:
