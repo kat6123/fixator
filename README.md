@@ -45,6 +45,8 @@ select all the entries from the file.
 * When the result is ready "hour" goroutine will merge sorted arrays using the heap. 
 ## Usage
 1) Service can be set up using config.yaml file.
+Use --yaml flag to define the path, otherwise default is used.
+
 2) Service start and end hour in .yaml defines the time when select requests can be handled.
 Out of this range service returns the error. 
 ## ToDo:
@@ -56,4 +58,8 @@ Router:
 Save:
 * Choose best buffer size depending on the service load.
 * We can add some postback url to approve that a fixation is in the system.
-* What to do with limit num of available goroutines 8k?
+* What to do with the limit num of available goroutines 8k?
+* Add an interface to work with os file system.
+
+Tests:
+* add
