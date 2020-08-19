@@ -37,9 +37,6 @@ func findMIN(root string, out chan string) {
 						minCh <- &minmax{}
 						return
 					}
-					// atomic??????
-					checkNext = false
-
 					scanner := bufio.NewScanner(w)
 					for scanner.Scan() {
 						value := scanner.Text()
@@ -67,6 +64,7 @@ func findMIN(root string, out chan string) {
 			for range Files[i] {
 				x := <-minCh
 				if *x != (minmax{}) && (s == 0 || x.value < min) {
+					checkNext = false
 					min, minVal = x.value, x.representation
 					s++
 				}
@@ -102,8 +100,6 @@ func findMAX(root string, out chan string) {
 						maxCh <- &minmax{}
 						return
 					}
-					// atomic??????
-					checkNext = false
 
 					scanner := bufio.NewScanner(w)
 					for scanner.Scan() {
@@ -132,6 +128,7 @@ func findMAX(root string, out chan string) {
 			for range Files[i] {
 				x := <-maxCh
 				if *x != (minmax{}) && (s == 0 || x.value > max) {
+					checkNext = false
 					max, maxVal = x.value, x.representation
 					s++
 				}
