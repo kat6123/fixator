@@ -15,129 +15,76 @@ type minmax struct {
 	representation string
 }
 
-func findMIN(root string, out chan string) {
+func find(name, root string, direct []int, comparison func(float64, float64) bool, out chan string) {
 	start := time.Now()
 
 	checkNext := true
-	minCh := make(chan *minmax)
-	s, min, minVal := 0, 0., ""
+	ch := make(chan *minmax)
+	s, value, valEntry := 0, 0., ""
 
-	for i := 0; i < len(Files); i++ {
+	for _, i := range direct {
 		{
 			if !checkNext {
 				break
 			}
 			for j := range Files[i] {
-				go func(file string) {
-					min := float64(max)
-					minVal := ""
-
-					w, err := os.Open(filepath.Join(root, file))
-					if os.IsNotExist(err) {
-						minCh <- &minmax{}
-						return
-					}
-					scanner := bufio.NewScanner(w)
-					for scanner.Scan() {
-						value := scanner.Text()
-						split := strings.Split(value, " ")
-						cur, err := strconv.ParseFloat(split[2], 32)
-						if err != nil {
-							log.Printf("find min: can't unmarshal %s: %v", value, err)
-							minCh <- &minmax{}
-							return
-						}
-
-						if cur < min {
-							min, minVal = cur, value
-						}
-					}
-
-					if err := scanner.Err(); err != nil {
-						log.Printf("find min: scanner error: %v", err)
-						minCh <- &minmax{}
-						return
-					}
-					minCh <- &minmax{min, minVal}
-				}(Files[i][j])
+				go findInFile(name, root, Files[i][j], comparison, ch)
 			}
 			for range Files[i] {
-				x := <-minCh
-				if *x != (minmax{}) && (s == 0 || x.value < min) {
+				x := <-ch
+				if *x != (minmax{}) && (s == 0 || comparison(x.value, value)) {
 					checkNext = false
-					min, minVal = x.value, x.representation
+					value, valEntry = x.value, x.representation
 					s++
 				}
 			}
 		}
+
 	}
-
 	elapsed := time.Since(start)
-	log.Printf("find min took %s", elapsed)
+	log.Printf("find %s took %s", name, elapsed)
 
-	out <- minVal
+	out <- valEntry
 }
 
-func findMAX(root string, out chan string) {
-	start := time.Now()
+func findInFile(name, root, file string, comparison func(float64, float64) bool, ch chan *minmax) {
+	s, val, valEntry := 0, float64(min), ""
 
-	checkNext := true
-	maxCh := make(chan *minmax)
-	s, max, maxVal := 0, 0., ""
+	w, err := os.Open(filepath.Join(root, file))
+	if os.IsNotExist(err) {
+		ch <- &minmax{}
+		return
+	}
 
-	for i := len(Files) - 1; i >= 0; i-- {
-		{
-			if !checkNext {
-				break
-			}
-			for j := range Files[i] {
-				go func(file string) {
-					max := float64(min)
-					maxVal := ""
-
-					w, err := os.Open(filepath.Join(root, file))
-					if os.IsNotExist(err) {
-						maxCh <- &minmax{}
-						return
-					}
-
-					scanner := bufio.NewScanner(w)
-					for scanner.Scan() {
-						value := scanner.Text()
-						split := strings.Split(value, " ")
-						cur, err := strconv.ParseFloat(split[2], 32)
-						if err != nil {
-							log.Printf("find max: can't unmarshal %s: %v", value, err)
-							maxCh <- &minmax{}
-							return
-						}
-
-						if cur > max {
-							max, maxVal = cur, value
-						}
-					}
-
-					if err := scanner.Err(); err != nil {
-						log.Printf("find max: scanner error: %v", err)
-						maxCh <- &minmax{}
-						return
-					}
-					maxCh <- &minmax{max, maxVal}
-				}(Files[i][j])
-			}
-			for range Files[i] {
-				x := <-maxCh
-				if *x != (minmax{}) && (s == 0 || x.value > max) {
-					checkNext = false
-					max, maxVal = x.value, x.representation
-					s++
-				}
-			}
+	scanner := bufio.NewScanner(w)
+	for scanner.Scan() {
+		value := scanner.Text()
+		split := strings.Split(value, " ")
+		cur, err := strconv.ParseFloat(split[2], 32)
+		if err != nil {
+			log.Printf("find %s: can't unmarshal %s: %v", name, value, err)
+			ch <- &minmax{}
+			return
 		}
 
+		if s == 0 || comparison(cur, val) {
+			val, valEntry = cur, value
+			s++
+		}
 	}
-	elapsed := time.Since(start)
-	log.Printf("find max took %s", elapsed)
 
-	out <- maxVal
+	if err := scanner.Err(); err != nil {
+		log.Printf("find %s: scanner error: %v", name, err)
+		ch <- &minmax{}
+		return
+	}
+	ch <- &minmax{val, valEntry}
+}
+
+func less(a, b float64) bool {
+	return a < b
+}
+
+func more(a, b float64) bool {
+	return a > b
 }

@@ -105,8 +105,8 @@ func (f *Fixator) SelectRange(date model.FixationTime) ([2]string, error) {
 	min, max := make(chan string), make(chan string)
 
 	root := filepath.Join(f.root, time.Time(date).Format(dayLayout))
-	go findMIN(root, min)
-	go findMAX(root, max)
+	go find("min", root, directSearch, less, min)
+	go find("max", root, reversedSearch, more, max)
 
 	for i := 0; i < 2; i++ {
 		select {

@@ -16,6 +16,8 @@ var (
 	// velocityRanges should be SORTED
 	velocityRanges []string
 	Files          [][]string
+
+	directSearch, reversedSearch []int
 )
 
 func init() {
@@ -31,6 +33,14 @@ func init() {
 		for j := 1; j <= 24; j++ {
 			Files[i][j-1] = fmt.Sprintf("%s-%d", v, j)
 		}
+	}
+
+	// Search indices are needed for minmax search.
+	directSearch = make([]int, len(Files))
+	reversedSearch = make([]int, len(Files))
+	for i := 0; i < len(Files); i++ {
+		directSearch[i] = i
+		reversedSearch[i] = len(Files) - i - 1
 	}
 }
 
