@@ -2,12 +2,13 @@ package handler
 
 import (
 	"encoding/json"
-	"fixator/model"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
+
+	"fixator/model"
 )
 
 const layout = "02.01.2006"
@@ -18,11 +19,6 @@ type (
 		Fix(fixation *model.Fixation) error
 		Select(date model.FixationTime, velocity model.FixationFloat) ([]*model.Fixation, error)
 		SelectRange(date model.FixationTime) ([2]string, error)
-	}
-
-	Config struct {
-		SelectStartHour TimePeriod `yaml:"select_start"`
-		SelectEndHour   TimePeriod `yaml:"select_end"`
 	}
 
 	API struct {

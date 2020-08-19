@@ -48,7 +48,6 @@ func sortHour(root string, hour int, boundary model.FixationFloat, out chan []*m
 		chToLook = item.FromChannel
 		result = append(result, item.Value)
 
-		//took from chanel
 		it, ok := <-channels[chToLook]
 		if !ok {
 			heap.Remove(&MERGED, 0)

@@ -1,13 +1,14 @@
 package config
 
 import (
-	"fixator/fixator"
-	"fixator/handler"
 	"flag"
 	"fmt"
 	"io/ioutil"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
+
+	"fixator/fixator"
+	"fixator/handler"
 )
 
 type (

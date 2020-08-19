@@ -5,10 +5,17 @@ import (
 	"time"
 )
 
-// TimePeriod is a type to store specific moment of the day as offset from midnight in minutes.
-type TimePeriod int
-
 const periodLayout = "15:04"
+
+type (
+	// TimePeriod is a type to store specific moment of the day as offset from midnight in minutes.
+	TimePeriod int
+
+	Config struct {
+		SelectStartHour TimePeriod `yaml:"select_start"`
+		SelectEndHour   TimePeriod `yaml:"select_end"`
+	}
+)
 
 // Implements the Unmarshaler interface of the yaml pkg.
 func (t *TimePeriod) UnmarshalYAML(unmarshal func(interface{}) error) error {
