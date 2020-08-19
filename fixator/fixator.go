@@ -2,7 +2,6 @@ package fixator
 
 import (
 	"fixator/model"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -75,20 +74,28 @@ func (f *Fixator) Fix(fixation *model.Fixation) error {
 }
 
 func (f *Fixator) Select(date model.FixationTime, velocity model.FixationFloat) ([]*model.Fixation, error) {
-	fmt.Printf("%v, %v\n", date, velocity)
-	velocityRange := make([]*model.Fixation, 2)
+	start := time.Now()
 
-	velocityRange[0] = &model.Fixation{
-		Datetime: model.FixationTime{},
-		Car:      "sAS",
-		Velocity: 65,
+	root := filepath.Join(f.root, time.Time(date).Format(dayLayout))
+
+	channels := make([]chan []*model.Fixation, 24)
+	for i := range channels {
+		channels[i] = make(chan []*model.Fixation)
 	}
-	velocityRange[1] = &model.Fixation{
-		Datetime: model.FixationTime{},
-		Car:      "sAS",
-		Velocity: 65,
+
+	for i := 0; i < 24; i++ {
+		go sortHour(root, i, velocity, channels[i])
 	}
-	return velocityRange, nil
+
+	result := make([]*model.Fixation, 0)
+	for i := range channels {
+		hourSorted := <-channels[i]
+		result = append(result, hourSorted...)
+	}
+
+	elapsed := time.Since(start)
+	log.Printf("select of %d entries took %s", len(result), elapsed)
+	return result, nil
 }
 
 func (f *Fixator) SelectRange(date model.FixationTime) ([2]string, error) {
